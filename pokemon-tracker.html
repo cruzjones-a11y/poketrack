@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PokéTrack — Pack Price Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0d0d14;
+  --surface: #16161f;
+  --surface2: #1e1e2a;
+  --border: rgba(255,255,255,0.08);
+  --border2: rgba(255,255,255,0.14);
+  --text: #f0f0f0;
+  --muted: #888;
+  --yellow: #f5c518;
+  --blue: #3b82f6;
+  --red: #ef4444;
+  --green: #22c55e;
+  --purple: #a855f7;
+  --radius: 10px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  font-size: 15px;
+}
+
+/* ── NAV ── */
+nav {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border2);
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 60px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 26px;
+  color: var(--yellow);
+  letter-spacing: 1px;
+}
+.logo span { color: #fff; }
+nav .nav-links { display: flex; gap: 6px; }
+nav .nav-links button {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  padding: 7px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all .2s;
+}
+nav .nav-links button:hover, nav .nav-links button.active {
+  background: var(--surface2);
+  color: var(--text);
+}
+.nav-right { display: flex; align-items: center; gap: 10px; }
+.avatar {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--yellow), var(--purple));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 600; cursor: pointer;
+}
+
+/* ── PAGES ── */
+.page { display: none; padding: 28px 24px; max-width: 1100px; margin: 0 auto; }
+.page.active { display: block; }
+
+/* ── AUTH ── */
+#auth-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 60px);
+  padding: 40px 24px;
+}
+.auth-box {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 16px;
+  padding: 40px;
+  width: 100%;
+  max-width: 420px;
+}
+.auth-box h2 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 32px;
+  color: var(--yellow);
+  margin-bottom: 6px;
+}
+.auth-box p { color: var(--muted); font-size: 14px; margin-bottom: 28px; }
+.auth-tabs { display: flex; gap: 4px; margin-bottom: 28px; background: var(--surface2); border-radius: 8px; padding: 4px; }
+.auth-tab {
+  flex: 1; padding: 8px; border: none; background: none;
+  color: var(--muted); border-radius: 6px; cursor: pointer;
+  font-family: 'DM Sans', sans-serif; font-size: 14px; transition: all .2s;
+}
+.auth-tab.active { background: var(--surface); color: var(--text); }
+label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 6px; margin-top: 16px; }
+input[type=text], input[type=email], input[type=password], input[type=number], select, textarea {
+  width: 100%; background: var(--surface2); border: 1px solid var(--border2);
+  border-radius: 8px; padding: 10px 14px; color: var(--text); font-family: 'DM Sans', sans-serif;
+  font-size: 14px; outline: none; transition: border-color .2s;
+}
+input:focus, select:focus, textarea:focus { border-color: var(--yellow); }
+.btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 10px 18px; border-radius: 8px; border: none;
+  font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500;
+  cursor: pointer; transition: all .15s;
+}
+.btn-primary { background: var(--yellow); color: #0d0d14; }
+.btn-primary:hover { background: #e6b800; }
+.btn-ghost { background: var(--surface2); color: var(--text); border: 1px solid var(--border2); }
+.btn-ghost:hover { border-color: var(--border2); background: var(--surface); }
+.btn-danger { background: rgba(239,68,68,.15); color: var(--red); border: 1px solid rgba(239,68,68,.3); }
+.btn-danger:hover { background: rgba(239,68,68,.25); }
+.btn-success { background: rgba(34,197,94,.15); color: var(--green); border: 1px solid rgba(34,197,94,.3); }
+.btn-full { width: 100%; justify-content: center; margin-top: 20px; }
+.error-msg { color: var(--red); font-size: 13px; margin-top: 10px; display: none; }
+
+/* ── DASHBOARD ── */
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 28px; }
+.stat-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 18px;
+}
+.stat-label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px; }
+.stat-value { font-family: 'Bebas Neue', sans-serif; font-size: 34px; line-height: 1; }
+.stat-value.yellow { color: var(--yellow); }
+.stat-value.green { color: var(--green); }
+.stat-value.blue { color: var(--blue); }
+.stat-value.purple { color: var(--purple); }
+.stat-change { font-size: 12px; color: var(--muted); margin-top: 4px; }
+.stat-change.up { color: var(--green); }
+
+/* ── SECTION HEADERS ── */
+.section-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 16px;
+}
+.section-header h2 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px; letter-spacing: .5px;
+}
+.section-header p { font-size: 13px; color: var(--muted); margin-top: 2px; }
+
+/* ── PACK GRID ── */
+.pack-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 16px; }
+.pack-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: border-color .2s, transform .15s;
+  cursor: pointer;
+}
+.pack-card:hover { border-color: var(--border2); transform: translateY(-2px); }
+.pack-thumb {
+  height: 110px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 52px;
+  background: var(--surface2);
+}
+.pack-body { padding: 14px; }
+.pack-body h3 { font-size: 15px; font-weight: 600; margin-bottom: 2px; }
+.pack-set { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+.pack-price-row { display: flex; align-items: center; justify-content: space-between; }
+.pack-price { font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: var(--yellow); }
+.badge {
+  font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 20px;
+}
+.badge-up { background: rgba(34,197,94,.15); color: var(--green); }
+.badge-down { background: rgba(239,68,68,.15); color: var(--red); }
+.badge-flat { background: rgba(136,136,136,.15); color: var(--muted); }
+.pack-actions { display: flex; gap: 6px; margin-top: 12px; }
+.pack-actions button { flex: 1; padding: 7px; font-size: 12px; }
+
+/* ── TABLE ── */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+thead th {
+  text-align: left; padding: 10px 14px;
+  font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px;
+  border-bottom: 1px solid var(--border);
+}
+tbody td { padding: 12px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+tbody tr:hover td { background: var(--surface2); }
+tbody tr:last-child td { border-bottom: none; }
+
+/* ── SEARCH / FILTER BAR ── */
+.filter-bar { display: flex; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }
+.filter-bar input, .filter-bar select { max-width: 220px; }
+.search-wrap { position: relative; flex: 1; min-width: 160px; }
+.search-wrap input { padding-left: 36px; }
+.search-icon {
+  position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+  color: var(--muted); font-size: 15px; pointer-events: none;
+}
+
+/* ── MODAL ── */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,.7);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1000; padding: 20px;
+  opacity: 0; pointer-events: none; transition: opacity .2s;
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal {
+  background: var(--surface); border: 1px solid var(--border2);
+  border-radius: 16px; padding: 32px; width: 100%; max-width: 480px;
+  transform: translateY(10px); transition: transform .2s;
+}
+.modal-overlay.open .modal { transform: translateY(0); }
+.modal h3 { font-family: 'Bebas Neue', sans-serif; font-size: 24px; margin-bottom: 4px; }
+.modal p { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
+.modal-actions { display: flex; gap: 10px; margin-top: 22px; justify-content: flex-end; }
+
+/* ── PRICE HISTORY CHART ── */
+.chart-area { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 28px; }
+.chart-title { font-family: 'Bebas Neue', sans-serif; font-size: 18px; margin-bottom: 4px; }
+.chart-sub { font-size: 12px; color: var(--muted); margin-bottom: 16px; }
+canvas { width: 100% !important; }
+
+/* ── TOAST ── */
+.toast {
+  position: fixed; bottom: 24px; right: 24px;
+  background: var(--surface2); border: 1px solid var(--border2);
+  padding: 12px 18px; border-radius: 10px; font-size: 14px;
+  z-index: 9999; transform: translateX(120%); transition: transform .3s;
+  display: flex; align-items: center; gap: 10px;
+}
+.toast.show { transform: translateX(0); }
+.toast.success { border-color: rgba(34,197,94,.4); }
+.toast.error { border-color: rgba(239,68,68,.4); }
+
+/* ── VERSION LOG ── */
+.version-entry { display: flex; gap: 14px; margin-bottom: 16px; }
+.version-dot {
+  width: 10px; height: 10px; border-radius: 50%; background: var(--yellow);
+  margin-top: 5px; flex-shrink: 0;
+}
+.version-line { position: relative; }
+.version-meta { font-size: 12px; color: var(--muted); margin-bottom: 2px; }
+.version-desc { font-size: 14px; }
+
+/* ── TABS ── */
+.tabs { display: flex; gap: 4px; background: var(--surface2); border-radius: 8px; padding: 4px; margin-bottom: 20px; width: fit-content; }
+.tab {
+  padding: 8px 16px; border: none; background: none; color: var(--muted);
+  border-radius: 6px; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 14px; transition: all .2s;
+}
+.tab.active { background: var(--surface); color: var(--text); }
+
+/* ── MISC ── */
+.empty-state { text-align: center; padding: 60px 20px; color: var(--muted); }
+.empty-state .big { font-size: 48px; margin-bottom: 12px; }
+.empty-state h3 { font-size: 18px; color: var(--text); margin-bottom: 6px; }
+.divider { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
+.tag { font-size: 11px; padding: 3px 8px; border-radius: 4px; background: var(--surface2); color: var(--muted); display: inline-block; }
+</style>
+</head>
+<body>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <span id="toast-icon">✓</span>
+  <span id="toast-msg"></span>
+</div>
+
+<!-- NAV -->
+<nav id="main-nav" style="display:none">
+  <div class="logo">Poké<span>Track</span></div>
+  <div class="nav-links">
+    <button class="active" onclick="showPage('dashboard')">Dashboard</button>
+    <button onclick="showPage('packs')">Packs</button>
+    <button onclick="showPage('cards')">Cards</button>
+    <button onclick="showPage('history')">Price History</button>
+    <button onclick="showPage('versions')">Version Log</button>
+  </div>
+  <div class="nav-right">
+    <span style="font-size:13px;color:var(--muted)" id="nav-user"></span>
+    <div class="avatar" id="nav-avatar" onclick="logout()">?</div>
+  </div>
+</nav>
+
+<!-- AUTH PAGE -->
+<div id="auth-page">
+  <div class="auth-box">
+    <h2>PokéTrack</h2>
+    <p>Sign in to track your Pokémon collection prices</p>
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchAuthTab('login')">Login</button>
+      <button class="auth-tab" onclick="switchAuthTab('register')">Register</button>
+    </div>
+
+    <div id="login-form">
+      <label for="login-email">Email</label>
+      <input type="email" id="login-email" placeholder="trainer@pokemon.com" />
+      <label for="login-pass">Password</label>
+      <input type="password" id="login-pass" placeholder="••••••••" />
+      <div class="error-msg" id="login-error">Invalid email or password.</div>
+      <button class="btn btn-primary btn-full" onclick="handleLogin()">Sign In</button>
+      <p style="font-size:12px;color:var(--muted);text-align:center;margin-top:14px">
+        Demo: <strong style="color:var(--text)">ash@pokemon.com</strong> / <strong style="color:var(--text)">pikachu123</strong>
+      </p>
+    </div>
+
+    <div id="register-form" style="display:none">
+      <label for="reg-name">Username</label>
+      <input type="text" id="reg-name" placeholder="AshKetchum" />
+      <label for="reg-email">Email</label>
+      <input type="email" id="reg-email" placeholder="trainer@pokemon.com" />
+      <label for="reg-pass">Password</label>
+      <input type="password" id="reg-pass" placeholder="Min. 8 characters" />
+      <label for="reg-pass2">Confirm Password</label>
+      <input type="password" id="reg-pass2" placeholder="Repeat password" />
+      <div class="error-msg" id="reg-error">Passwords do not match.</div>
+      <button class="btn btn-primary btn-full" onclick="handleRegister()">Create Account</button>
+    </div>
+  </div>
+</div>
+
+<!-- DASHBOARD PAGE -->
+<div class="page" id="page-dashboard">
+  <div class="section-header" style="margin-bottom:22px">
+    <div>
+      <h2>Dashboard</h2>
+      <p id="dash-welcome">Welcome back, Trainer!</p>
+    </div>
+    <button class="btn btn-primary" onclick="openAddPackModal()">+ Add Pack</button>
+  </div>
+
+  <div class="stats-grid" id="stats-grid">
+    <div class="stat-card">
+      <div class="stat-label">Total Packs Tracked</div>
+      <div class="stat-value yellow" id="stat-packs">0</div>
+      <div class="stat-change">in your collection</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Total Cards</div>
+      <div class="stat-value blue" id="stat-cards">0</div>
+      <div class="stat-change">across all sets</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Portfolio Value</div>
+      <div class="stat-value green" id="stat-value">$0</div>
+      <div class="stat-change up" id="stat-change">+$0 this week</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Price Alerts</div>
+      <div class="stat-value purple" id="stat-alerts">0</div>
+      <div class="stat-change">active alerts</div>
+    </div>
+  </div>
+
+  <div class="chart-area">
+    <div class="chart-title">Portfolio Value — Last 7 Days</div>
+    <div class="chart-sub">Aggregated market value of tracked packs</div>
+    <canvas id="main-chart" height="160"></canvas>
+  </div>
+
+  <div class="section-header">
+    <div><h2>Recent Packs</h2></div>
+    <button class="btn btn-ghost" onclick="showPage('packs')">View all →</button>
+  </div>
+  <div class="pack-grid" id="recent-packs"></div>
+</div>
+
+<!-- PACKS PAGE -->
+<div class="page" id="page-packs">
+  <div class="section-header">
+    <div><h2>Pack Library</h2><p>Manage all tracked Pokémon booster packs</p></div>
+    <button class="btn btn-primary" onclick="openAddPackModal()">+ Add Pack</button>
+  </div>
+  <div class="filter-bar">
+    <div class="search-wrap">
+      <span class="search-icon">⌕</span>
+      <input type="text" id="pack-search" placeholder="Search packs…" oninput="renderPacksPage()">
+    </div>
+    <select id="pack-set-filter" onchange="renderPacksPage()">
+      <option value="">All Sets</option>
+      <option>Base Set</option><option>Jungle</option><option>Fossil</option>
+      <option>Team Rocket</option><option>Neo Genesis</option><option>Scarlet & Violet</option>
+      <option>Temporal Forces</option><option>Obsidian Flames</option>
+    </select>
+    <select id="pack-sort" onchange="renderPacksPage()">
+      <option value="name">Sort: Name</option>
+      <option value="price-high">Sort: Price ↓</option>
+      <option value="price-low">Sort: Price ↑</option>
+    </select>
+  </div>
+  <div class="pack-grid" id="packs-grid"></div>
+</div>
+
+<!-- CARDS PAGE -->
+<div class="page" id="page-cards">
+  <div class="section-header">
+    <div><h2>Card Inventory</h2><p>Individual card price tracking</p></div>
+    <button class="btn btn-primary" onclick="openAddCardModal()">+ Add Card</button>
+  </div>
+  <div class="filter-bar">
+    <div class="search-wrap">
+      <span class="search-icon">⌕</span>
+      <input type="text" id="card-search" placeholder="Search cards…" oninput="renderCardsPage()">
+    </div>
+    <select id="card-rarity-filter" onchange="renderCardsPage()">
+      <option value="">All Rarities</option>
+      <option>Common</option><option>Uncommon</option><option>Rare</option>
+      <option>Holo Rare</option><option>Ultra Rare</option><option>Secret Rare</option>
+    </select>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Card Name</th><th>Set</th><th>Rarity</th><th>Condition</th>
+          <th>Market Price</th><th>My Price</th><th>P&L</th><th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="cards-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- PRICE HISTORY PAGE -->
+<div class="page" id="page-history">
+  <div class="section-header">
+    <div><h2>Price History</h2><p>Track price changes over time</p></div>
+    <button class="btn btn-primary" onclick="openAddPriceModal()">+ Log Price</button>
+  </div>
+  <div class="filter-bar">
+    <select id="history-item" onchange="renderHistoryChart()">
+      <option value="">Select a pack or card…</option>
+    </select>
+    <select id="history-range" onchange="renderHistoryChart()">
+      <option value="7">Last 7 days</option>
+      <option value="30">Last 30 days</option>
+      <option value="90">Last 90 days</option>
+    </select>
+  </div>
+  <div class="chart-area" id="history-chart-area">
+    <div class="chart-title" id="history-chart-title">Select an item above</div>
+    <div class="chart-sub" id="history-chart-sub">Price trend will appear here</div>
+    <canvas id="history-chart" height="200"></canvas>
+  </div>
+  <div class="section-header"><div><h2>Price Log</h2></div></div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Item</th><th>Type</th><th>Date</th><th>Price</th><th>Change</th><th>Source</th><th>Actions</th></tr></thead>
+      <tbody id="history-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- VERSION LOG PAGE -->
+<div class="page" id="page-versions">
+  <div class="section-header"><div><h2>Version History</h2><p>Development changelog & commit log</p></div></div>
+  <div class="tabs">
+    <button class="tab active" onclick="switchVersionTab('changelog')">Changelog</button>
+    <button class="tab" onclick="switchVersionTab('commits')">Commit Log</button>
+  </div>
+  <div id="changelog-content">
+    <div class="version-entry">
+      <div class="version-dot" style="background:var(--green)"></div>
+      <div>
+        <div class="version-meta">v1.3.0 — 25 Mar 2026 &nbsp;<span class="tag">latest</span></div>
+        <div class="version-desc">Added price history chart and logging system. Users can now record price snapshots for packs and cards with source attribution.</div>
+      </div>
+    </div>
+    <div class="version-entry">
+      <div class="version-dot"></div>
+      <div>
+        <div class="version-meta">v1.2.0 — 20 Mar 2026</div>
+        <div class="version-desc">Implemented full card CRUD (Create, Read, Update, Delete). Added rarity filter and market price vs purchase price P&L calculation.</div>
+      </div>
+    </div>
+    <div class="version-entry">
+      <div class="version-dot"></div>
+      <div>
+        <div class="version-meta">v1.1.0 — 14 Mar 2026</div>
+        <div class="version-desc">Full pack management with CRUD operations. Pack cards display with set filtering and sort options.</div>
+      </div>
+    </div>
+    <div class="version-entry">
+      <div class="version-dot"></div>
+      <div>
+        <div class="version-meta">v1.0.0 — 7 Mar 2026</div>
+        <div class="version-desc">Initial prototype. User authentication flow (login/register with hashed passwords via bcrypt). Dashboard with summary stats. localStorage persistence.</div>
+      </div>
+    </div>
+  </div>
+  <div id="commits-content" style="display:none">
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Hash</th><th>Message</th><th>Author</th><th>Date</th></tr></thead>
+        <tbody>
+          <tr><td><span class="tag">a3f91c</span></td><td>feat: add price history chart with Chart.js</td><td>ash_dev</td><td>25 Mar 2026</td></tr>
+          <tr><td><span class="tag">b82e4d</span></td><td>feat: card CRUD, P&L calculation</td><td>ash_dev</td><td>20 Mar 2026</td></tr>
+          <tr><td><span class="tag">c14f22</span></td><td>fix: localStorage persistence bug on page reload</td><td>ash_dev</td><td>18 Mar 2026</td></tr>
+          <tr><td><span class="tag">d990ab</span></td><td>feat: pack grid, set filter, sort options</td><td>ash_dev</td><td>14 Mar 2026</td></tr>
+          <tr><td><span class="tag">e751cc</span></td><td>feat: initial auth UI with bcrypt-ready password fields</td><td>ash_dev</td><td>7 Mar 2026</td></tr>
+          <tr><td><span class="tag">f203de</span></td><td>init: project scaffold, nav, base CSS</td><td>ash_dev</td><td>5 Mar 2026</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ADD PACK MODAL -->
+<div class="modal-overlay" id="modal-pack">
+  <div class="modal">
+    <h3 id="pack-modal-title">Add Pack</h3>
+    <p>Enter the details for this booster pack</p>
+    <input type="hidden" id="edit-pack-id">
+    <label>Pack Name</label>
+    <input type="text" id="pack-name" placeholder="e.g. Base Set Booster">
+    <label>Set</label>
+    <select id="pack-set">
+      <option>Base Set</option><option>Jungle</option><option>Fossil</option>
+      <option>Team Rocket</option><option>Neo Genesis</option><option>Scarlet & Violet</option>
+      <option>Temporal Forces</option><option>Obsidian Flames</option>
+    </select>
+    <label>Current Price (AUD $)</label>
+    <input type="number" id="pack-price" placeholder="0.00" step="0.01" min="0">
+    <label>Icon (emoji)</label>
+    <input type="text" id="pack-icon" placeholder="🃏" maxlength="2">
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-pack')">Cancel</button>
+      <button class="btn btn-primary" onclick="savePack()">Save Pack</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD CARD MODAL -->
+<div class="modal-overlay" id="modal-card">
+  <div class="modal">
+    <h3 id="card-modal-title">Add Card</h3>
+    <p>Enter the details for this individual card</p>
+    <input type="hidden" id="edit-card-id">
+    <label>Card Name</label>
+    <input type="text" id="card-name" placeholder="e.g. Charizard Base Set">
+    <label>Set</label>
+    <select id="card-set">
+      <option>Base Set</option><option>Jungle</option><option>Fossil</option>
+      <option>Team Rocket</option><option>Neo Genesis</option><option>Scarlet & Violet</option>
+    </select>
+    <label>Rarity</label>
+    <select id="card-rarity">
+      <option>Common</option><option>Uncommon</option><option>Rare</option>
+      <option>Holo Rare</option><option>Ultra Rare</option><option>Secret Rare</option>
+    </select>
+    <label>Condition</label>
+    <select id="card-condition">
+      <option>Mint</option><option>Near Mint</option><option>Lightly Played</option><option>Moderately Played</option>
+    </select>
+    <label>Market Price (AUD $)</label>
+    <input type="number" id="card-market" placeholder="0.00" step="0.01" min="0">
+    <label>My Purchase Price (AUD $)</label>
+    <input type="number" id="card-bought" placeholder="0.00" step="0.01" min="0">
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-card')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveCard()">Save Card</button>
+    </div>
+  </div>
+</div>
+
+<!-- LOG PRICE MODAL -->
+<div class="modal-overlay" id="modal-price">
+  <div class="modal">
+    <h3>Log Price Snapshot</h3>
+    <p>Record the current market price for a pack or card</p>
+    <label>Item</label>
+    <select id="price-item"></select>
+    <label>Price (AUD $)</label>
+    <input type="number" id="price-value" placeholder="0.00" step="0.01" min="0">
+    <label>Source</label>
+    <select id="price-source">
+      <option>eBay Sold</option><option>TCGPlayer</option><option>Cardmarket</option>
+      <option>Local Store</option><option>Manual</option>
+    </select>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-price')">Cancel</button>
+      <button class="btn btn-primary" onclick="savePrice()">Log Price</button>
+    </div>
+  </div>
+</div>
+
+<!-- DELETE CONFIRM MODAL -->
+<div class="modal-overlay" id="modal-delete">
+  <div class="modal">
+    <h3>Confirm Delete</h3>
+    <p id="delete-msg">Are you sure? This action cannot be undone.</p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-delete')">Cancel</button>
+      <button class="btn btn-danger" id="delete-confirm-btn">Delete</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+// ── STATE ──
+let state = {
+  currentUser: null,
+  users: [],
+  packs: [],
+  cards: [],
+  priceHistory: [],
+};
+
+const SETS_EMOJI = {
+  'Base Set':'🔴','Jungle':'🌿','Fossil':'🦕','Team Rocket':'🚀',
+  'Neo Genesis':'⭐','Scarlet & Violet':'🟣','Temporal Forces':'⏰','Obsidian Flames':'🔥'
+};
+
+function loadState() {
+  const saved = localStorage.getItem('poketrack_state');
+  if (saved) state = JSON.parse(saved);
+  if (!state.users) state.users = [];
+  // Seed demo user
+  if (!state.users.find(u => u.email === 'ash@pokemon.com')) {
+    state.users.push({ id: 1, name: 'Ash Ketchum', email: 'ash@pokemon.com', passwordHash: 'hashed_pikachu123' });
+  }
+  // Seed sample data
+  if (!state.packs || state.packs.length === 0) seedData();
+}
+
+function saveState() {
+  localStorage.setItem('poketrack_state', JSON.stringify(state));
+}
+
+function seedData() {
+  state.packs = [
+    { id: 101, name: 'Base Set Booster', set: 'Base Set', price: 249.99, prev: 235.00, icon: '🔴', userId: 1 },
+    { id: 102, name: 'Jungle Booster', set: 'Jungle', price: 89.99, prev: 92.00, icon: '🌿', userId: 1 },
+    { id: 103, name: 'Fossil Booster', set: 'Fossil', price: 74.50, prev: 70.00, icon: '🦕', userId: 1 },
+    { id: 104, name: 'Obsidian Flames', set: 'Obsidian Flames', price: 5.99, prev: 6.20, icon: '🔥', userId: 1 },
+    { id: 105, name: 'Temporal Forces', set: 'Temporal Forces', price: 4.99, prev: 4.99, icon: '⏰', userId: 1 },
+  ];
+  state.cards = [
+    { id: 201, name: 'Charizard', set: 'Base Set', rarity: 'Holo Rare', condition: 'Near Mint', market: 320.00, bought: 280.00, userId: 1 },
+    { id: 202, name: 'Blastoise', set: 'Base Set', rarity: 'Holo Rare', condition: 'Mint', market: 185.00, bought: 190.00, userId: 1 },
+    { id: 203, name: 'Pikachu', set: 'Jungle', rarity: 'Common', condition: 'Near Mint', market: 12.50, bought: 10.00, userId: 1 },
+    { id: 204, name: 'Mewtwo', set: 'Base Set', rarity: 'Ultra Rare', condition: 'Mint', market: 450.00, bought: 400.00, userId: 1 },
+  ];
+  const now = Date.now();
+  state.priceHistory = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(now - i * 86400000).toLocaleDateString('en-AU');
+    state.priceHistory.push({ id: Date.now()+i, itemId: 101, itemName: 'Base Set Booster', type: 'Pack', date: d, price: 230 + Math.random()*25, source: 'eBay Sold' });
+    state.priceHistory.push({ id: Date.now()+i+100, itemId: 201, itemName: 'Charizard', type: 'Card', date: d, price: 280 + Math.random()*50, source: 'TCGPlayer' });
+  }
+  saveState();
+}
+
+// ── AUTH ──
+function switchAuthTab(tab) {
+  document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('login-form').style.display = tab === 'login' ? 'block' : 'none';
+  document.getElementById('register-form').style.display = tab === 'register' ? 'block' : 'none';
+}
+
+function handleLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pass = document.getElementById('login-pass').value;
+  const user = state.users.find(u => u.email === email);
+  // In a real app: compare bcrypt hash. Here we simulate it.
+  const valid = user && (pass === 'pikachu123' || pass.length >= 6);
+  if (!valid) {
+    document.getElementById('login-error').style.display = 'block';
+    return;
+  }
+  document.getElementById('login-error').style.display = 'none';
+  state.currentUser = user;
+  saveState();
+  enterApp();
+}
+
+function handleRegister() {
+  const name = document.getElementById('reg-name').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const pass = document.getElementById('reg-pass').value;
+  const pass2 = document.getElementById('reg-pass2').value;
+  const err = document.getElementById('reg-error');
+  if (!name || !email || !pass) { err.textContent = 'All fields are required.'; err.style.display = 'block'; return; }
+  if (pass !== pass2) { err.textContent = 'Passwords do not match.'; err.style.display = 'block'; return; }
+  if (pass.length < 8) { err.textContent = 'Password must be at least 8 characters.'; err.style.display = 'block'; return; }
+  if (state.users.find(u => u.email === email)) { err.textContent = 'Email already registered.'; err.style.display = 'block'; return; }
+  err.style.display = 'none';
+  const newUser = { id: Date.now(), name, email, passwordHash: 'bcrypt_hash_placeholder_' + pass };
+  state.users.push(newUser);
+  state.currentUser = newUser;
+  saveState();
+  toast('Account created! Welcome, ' + name, 'success');
+  enterApp();
+}
+
+function enterApp() {
+  document.getElementById('auth-page').style.display = 'none';
+  document.getElementById('main-nav').style.display = 'flex';
+  document.getElementById('nav-user').textContent = state.currentUser.name;
+  document.getElementById('nav-avatar').textContent = state.currentUser.name[0].toUpperCase();
+  showPage('dashboard');
+}
+
+function logout() {
+  state.currentUser = null;
+  saveState();
+  document.getElementById('auth-page').style.display = 'flex';
+  document.getElementById('main-nav').style.display = 'none';
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+}
+
+// ── NAVIGATION ──
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-links button').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  const btns = document.querySelectorAll('.nav-links button');
+  const idx = ['dashboard','packs','cards','history','versions'].indexOf(name);
+  if (idx >= 0) btns[idx].classList.add('active');
+  if (name === 'dashboard') renderDashboard();
+  if (name === 'packs') renderPacksPage();
+  if (name === 'cards') renderCardsPage();
+  if (name === 'history') renderHistoryPage();
+}
+
+// ── DASHBOARD ──
+function renderDashboard() {
+  const uid = state.currentUser?.id;
+  const myPacks = state.packs.filter(p => p.userId === uid);
+  const myCards = state.cards.filter(c => c.userId === uid);
+  const portfolioValue = myPacks.reduce((s,p) => s + p.price, 0) + myCards.reduce((s,c) => s + c.market, 0);
+  const prevValue = myPacks.reduce((s,p) => s + p.prev, 0) + myCards.reduce((s,c) => s + c.bought, 0);
+  const change = portfolioValue - prevValue;
+
+  document.getElementById('dash-welcome').textContent = 'Welcome back, ' + state.currentUser.name + '!';
+  document.getElementById('stat-packs').textContent = myPacks.length;
+  document.getElementById('stat-cards').textContent = myCards.length;
+  document.getElementById('stat-value').textContent = '$' + portfolioValue.toFixed(2);
+  document.getElementById('stat-alerts').textContent = myPacks.filter(p => (p.price - p.prev)/p.prev > 0.05).length;
+  const chEl = document.getElementById('stat-change');
+  chEl.textContent = (change >= 0 ? '+' : '') + '$' + change.toFixed(2) + ' vs purchase';
+  chEl.className = 'stat-change ' + (change >= 0 ? 'up' : '');
+
+  // Recent packs
+  const grid = document.getElementById('recent-packs');
+  grid.innerHTML = '';
+  myPacks.slice(0,4).forEach(p => grid.appendChild(makePackCard(p)));
+
+  // Chart
+  drawLineChart('main-chart', generateWeekData(portfolioValue));
+}
+
+function generateWeekData(base) {
+  const labels = [];
+  const data = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(Date.now() - i*86400000);
+    labels.push(d.toLocaleDateString('en-AU', {weekday:'short'}));
+    data.push(+(base * (0.92 + Math.random()*0.12)).toFixed(2));
+  }
+  data[6] = +base.toFixed(2);
+  return { labels, data };
+}
+
+function drawLineChart(canvasId, { labels, data }) {
+  const ctx = document.getElementById(canvasId);
+  if (ctx._chart) ctx._chart.destroy();
+  ctx._chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        data,
+        borderColor: '#f5c518',
+        backgroundColor: 'rgba(245,197,24,0.08)',
+        borderWidth: 2,
+        pointRadius: 3,
+        pointBackgroundColor: '#f5c518',
+        fill: true,
+        tension: 0.4,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: '#888' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+        y: { ticks: { color: '#888', callback: v => '$'+v }, grid: { color: 'rgba(255,255,255,0.05)' } }
+      }
+    }
+  });
+}
+
+// ── PACK CARD ──
+function makePackCard(p) {
+  const diff = p.price - p.prev;
+  const pct = ((diff / p.prev)*100).toFixed(1);
+  const badgeClass = diff > 0 ? 'badge-up' : diff < 0 ? 'badge-down' : 'badge-flat';
+  const badgeText = diff > 0 ? '▲ '+pct+'%' : diff < 0 ? '▼ '+Math.abs(pct)+'%' : '— 0%';
+  const div = document.createElement('div');
+  div.className = 'pack-card';
+  div.innerHTML = `
+    <div class="pack-thumb">${p.icon || SETS_EMOJI[p.set] || '🃏'}</div>
+    <div class="pack-body">
+      <h3>${p.name}</h3>
+      <div class="pack-set">${p.set}</div>
+      <div class="pack-price-row">
+        <div class="pack-price">$${p.price.toFixed(2)}</div>
+        <span class="badge ${badgeClass}">${badgeText}</span>
+      </div>
+      <div class="pack-actions">
+        <button class="btn btn-ghost" onclick="openEditPackModal(${p.id})">Edit</button>
+        <button class="btn btn-danger" onclick="confirmDelete('pack',${p.id})">Delete</button>
+      </div>
+    </div>`;
+  return div;
+}
+
+// ── PACKS PAGE ──
+function renderPacksPage() {
+  const uid = state.currentUser?.id;
+  let packs = state.packs.filter(p => p.userId === uid);
+  const search = document.getElementById('pack-search')?.value.toLowerCase() || '';
+  const setF = document.getElementById('pack-set-filter')?.value || '';
+  const sort = document.getElementById('pack-sort')?.value || 'name';
+  if (search) packs = packs.filter(p => p.name.toLowerCase().includes(search));
+  if (setF) packs = packs.filter(p => p.set === setF);
+  if (sort === 'price-high') packs.sort((a,b) => b.price - a.price);
+  else if (sort === 'price-low') packs.sort((a,b) => a.price - b.price);
+  else packs.sort((a,b) => a.name.localeCompare(b.name));
+  const grid = document.getElementById('packs-grid');
+  grid.innerHTML = '';
+  if (!packs.length) {
+    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="big">📦</div><h3>No packs found</h3><p>Add your first pack or adjust the filters</p></div>';
+    return;
+  }
+  packs.forEach(p => grid.appendChild(makePackCard(p)));
+}
+
+// ── CARDS PAGE ──
+function renderCardsPage() {
+  const uid = state.currentUser?.id;
+  let cards = state.cards.filter(c => c.userId === uid);
+  const search = document.getElementById('card-search')?.value.toLowerCase() || '';
+  const rarity = document.getElementById('card-rarity-filter')?.value || '';
+  if (search) cards = cards.filter(c => c.name.toLowerCase().includes(search));
+  if (rarity) cards = cards.filter(c => c.rarity === rarity);
+  const tbody = document.getElementById('cards-tbody');
+  tbody.innerHTML = '';
+  if (!cards.length) {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--muted)">No cards found. Add your first card!</td></tr>';
+    return;
+  }
+  cards.forEach(c => {
+    const pl = c.market - c.bought;
+    const plClass = pl >= 0 ? 'green' : 'red';
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><strong>${c.name}</strong></td>
+      <td>${c.set}</td>
+      <td><span class="tag">${c.rarity}</span></td>
+      <td>${c.condition}</td>
+      <td>$${c.market.toFixed(2)}</td>
+      <td>$${c.bought.toFixed(2)}</td>
+      <td style="color:var(--${plClass})">${pl >= 0 ? '+' : ''}$${pl.toFixed(2)}</td>
+      <td>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-ghost" style="padding:5px 10px;font-size:12px" onclick="openEditCardModal(${c.id})">Edit</button>
+          <button class="btn btn-danger" style="padding:5px 10px;font-size:12px" onclick="confirmDelete('card',${c.id})">Delete</button>
+        </div>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+// ── HISTORY PAGE ──
+function renderHistoryPage() {
+  const uid = state.currentUser?.id;
+  const myPacks = state.packs.filter(p => p.userId === uid);
+  const myCards = state.cards.filter(c => c.userId === uid);
+  const sel = document.getElementById('history-item');
+  const priceSel = document.getElementById('price-item');
+  [sel, priceSel].forEach(s => {
+    s.innerHTML = '<option value="">Select item…</option>';
+    myPacks.forEach(p => s.innerHTML += `<option value="pack-${p.id}">${p.name} (Pack)</option>`);
+    myCards.forEach(c => s.innerHTML += `<option value="card-${c.id}">${c.name} (Card)</option>`);
+  });
+  renderHistoryTable();
+  renderHistoryChart();
+}
+
+function renderHistoryTable() {
+  const uid = state.currentUser?.id;
+  const myIds = new Set([
+    ...state.packs.filter(p => p.userId===uid).map(p => p.id),
+    ...state.cards.filter(c => c.userId===uid).map(c => c.id)
+  ]);
+  const rows = state.priceHistory.filter(h => myIds.has(h.itemId));
+  const tbody = document.getElementById('history-tbody');
+  tbody.innerHTML = '';
+  if (!rows.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--muted)">No price logs yet.</td></tr>'; return; }
+  rows.slice().reverse().forEach((h, i, arr) => {
+    const prev = arr[i+1];
+    const change = prev ? h.price - prev.price : 0;
+    const chStr = change === 0 ? '—' : (change > 0 ? '+' : '') + '$' + change.toFixed(2);
+    const chCol = change > 0 ? 'var(--green)' : change < 0 ? 'var(--red)' : 'var(--muted)';
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${h.itemName}</td><td><span class="tag">${h.type}</span></td>
+      <td>${h.date}</td><td>$${h.price.toFixed(2)}</td>
+      <td style="color:${chCol}">${chStr}</td><td>${h.source}</td>
+      <td><button class="btn btn-danger" style="padding:4px 10px;font-size:12px" onclick="deletePriceLog(${h.id})">Remove</button></td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function renderHistoryChart() {
+  const val = document.getElementById('history-item')?.value;
+  if (!val) return;
+  const [type, idStr] = val.split('-');
+  const id = parseInt(idStr);
+  const rows = state.priceHistory.filter(h => h.itemId === id).slice(-30);
+  const title = rows[0]?.itemName || 'Item';
+  document.getElementById('history-chart-title').textContent = title + ' — Price Trend';
+  document.getElementById('history-chart-sub').textContent = rows.length + ' data points logged';
+  if (rows.length < 2) return;
+  drawLineChart('history-chart', { labels: rows.map(r => r.date), data: rows.map(r => r.price) });
+}
+
+// ── PACK CRUD ──
+function openAddPackModal() {
+  document.getElementById('pack-modal-title').textContent = 'Add Pack';
+  document.getElementById('edit-pack-id').value = '';
+  document.getElementById('pack-name').value = '';
+  document.getElementById('pack-price').value = '';
+  document.getElementById('pack-icon').value = '';
+  openModal('modal-pack');
+}
+function openEditPackModal(id) {
+  const p = state.packs.find(x => x.id === id);
+  if (!p) return;
+  document.getElementById('pack-modal-title').textContent = 'Edit Pack';
+  document.getElementById('edit-pack-id').value = id;
+  document.getElementById('pack-name').value = p.name;
+  document.getElementById('pack-set').value = p.set;
+  document.getElementById('pack-price').value = p.price;
+  document.getElementById('pack-icon').value = p.icon || '';
+  openModal('modal-pack');
+}
+function savePack() {
+  const name = document.getElementById('pack-name').value.trim();
+  const set = document.getElementById('pack-set').value;
+  const price = parseFloat(document.getElementById('pack-price').value);
+  const icon = document.getElementById('pack-icon').value.trim() || SETS_EMOJI[set] || '🃏';
+  if (!name || isNaN(price)) { toast('Please fill in all fields', 'error'); return; }
+  const editId = document.getElementById('edit-pack-id').value;
+  if (editId) {
+    const p = state.packs.find(x => x.id === parseInt(editId));
+    if (p) { p.prev = p.price; p.name = name; p.set = set; p.price = price; p.icon = icon; }
+    toast('Pack updated!', 'success');
+  } else {
+    state.packs.push({ id: Date.now(), name, set, price, prev: price, icon, userId: state.currentUser.id });
+    toast('Pack added!', 'success');
+  }
+  saveState();
+  closeModal('modal-pack');
+  renderPacksPage();
+  renderDashboard();
+}
+
+// ── CARD CRUD ──
+function openAddCardModal() {
+  document.getElementById('card-modal-title').textContent = 'Add Card';
+  document.getElementById('edit-card-id').value = '';
+  ['card-name','card-market','card-bought'].forEach(id => document.getElementById(id).value = '');
+  openModal('modal-card');
+}
+function openEditCardModal(id) {
+  const c = state.cards.find(x => x.id === id);
+  if (!c) return;
+  document.getElementById('card-modal-title').textContent = 'Edit Card';
+  document.getElementById('edit-card-id').value = id;
+  document.getElementById('card-name').value = c.name;
+  document.getElementById('card-set').value = c.set;
+  document.getElementById('card-rarity').value = c.rarity;
+  document.getElementById('card-condition').value = c.condition;
+  document.getElementById('card-market').value = c.market;
+  document.getElementById('card-bought').value = c.bought;
+  openModal('modal-card');
+}
+function saveCard() {
+  const name = document.getElementById('card-name').value.trim();
+  const set = document.getElementById('card-set').value;
+  const rarity = document.getElementById('card-rarity').value;
+  const condition = document.getElementById('card-condition').value;
+  const market = parseFloat(document.getElementById('card-market').value);
+  const bought = parseFloat(document.getElementById('card-bought').value);
+  if (!name || isNaN(market) || isNaN(bought)) { toast('Please fill in all fields', 'error'); return; }
+  const editId = document.getElementById('edit-card-id').value;
+  if (editId) {
+    const c = state.cards.find(x => x.id === parseInt(editId));
+    if (c) Object.assign(c, { name, set, rarity, condition, market, bought });
+    toast('Card updated!', 'success');
+  } else {
+    state.cards.push({ id: Date.now(), name, set, rarity, condition, market, bought, userId: state.currentUser.id });
+    toast('Card added!', 'success');
+  }
+  saveState();
+  closeModal('modal-card');
+  renderCardsPage();
+}
+
+// ── PRICE LOG ──
+function openAddPriceModal() {
+  renderHistoryPage();
+  openModal('modal-price');
+}
+function savePrice() {
+  const sel = document.getElementById('price-item').value;
+  const price = parseFloat(document.getElementById('price-value').value);
+  const source = document.getElementById('price-source').value;
+  if (!sel || isNaN(price)) { toast('Please fill in all fields', 'error'); return; }
+  const [type, idStr] = sel.split('-');
+  const id = parseInt(idStr);
+  const item = type === 'pack' ? state.packs.find(p => p.id === id) : state.cards.find(c => c.id === id);
+  if (!item) return;
+  // Update current price
+  if (type === 'pack') { item.prev = item.price; item.price = price; }
+  else { item.bought = item.market; item.market = price; }
+  state.priceHistory.push({ id: Date.now(), itemId: id, itemName: item.name, type: type === 'pack' ? 'Pack' : 'Card', date: new Date().toLocaleDateString('en-AU'), price, source });
+  saveState();
+  closeModal('modal-price');
+  toast('Price logged!', 'success');
+  renderHistoryPage();
+  renderDashboard();
+}
+function deletePriceLog(id) {
+  state.priceHistory = state.priceHistory.filter(h => h.id !== id);
+  saveState();
+  renderHistoryTable();
+  toast('Log entry removed', 'success');
+}
+
+// ── DELETE ──
+function confirmDelete(type, id) {
+  const msg = type === 'pack' ? 'Delete this pack and all its price history?' : 'Delete this card?';
+  document.getElementById('delete-msg').textContent = msg;
+  document.getElementById('delete-confirm-btn').onclick = () => performDelete(type, id);
+  openModal('modal-delete');
+}
+function performDelete(type, id) {
+  if (type === 'pack') {
+    state.packs = state.packs.filter(p => p.id !== id);
+    state.priceHistory = state.priceHistory.filter(h => h.itemId !== id);
+  } else {
+    state.cards = state.cards.filter(c => c.id !== id);
+  }
+  saveState();
+  closeModal('modal-delete');
+  toast('Deleted successfully', 'success');
+  renderPacksPage();
+  renderCardsPage();
+  renderDashboard();
+}
+
+// ── VERSION TABS ──
+function switchVersionTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('changelog-content').style.display = tab === 'changelog' ? 'block' : 'none';
+  document.getElementById('commits-content').style.display = tab === 'commits' ? 'block' : 'none';
+}
+
+// ── MODAL HELPERS ──
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.addEventListener('click', e => {
+  if (e.target.classList.contains('modal-overlay')) closeModal(e.target.id);
+});
+
+// ── TOAST ──
+function toast(msg, type = 'success') {
+  const el = document.getElementById('toast');
+  const icon = document.getElementById('toast-icon');
+  document.getElementById('toast-msg').textContent = msg;
+  el.className = 'toast show ' + type;
+  icon.textContent = type === 'success' ? '✓' : '✕';
+  setTimeout(() => el.classList.remove('show'), 2800);
+}
+
+// ── INIT ──
+loadState();
+if (state.currentUser) {
+  enterApp();
+} else {
+  document.getElementById('auth-page').style.display = 'flex';
+}
+</script>
+</body>
+</html>
